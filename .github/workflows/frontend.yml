@@ -98,11 +98,10 @@ jobs:
       - name: Build e push da imagem
         uses: docker/build-push-action@v7
         with:
-          with:
-            context: "{{defaultContext}}:frontend"
-            push: true
-            build-args: |
-              VITE_API_URL=${{ vars.VITE_API_URL }}
-            tags: |
-              ${{ vars.DOCKERHUB_USERNAME }}/gastos-frontend:latest
-              ${{ vars.DOCKERHUB_USERNAME }}/gastos-frontend:sha-${{ github.sha }}
+          context: "{{defaultContext}}:frontend"
+          push: true
+          build-args: |
+            VITE_API_URL=${{ vars.VITE_API_URL }}
+          tags: |
+            ${{ vars.DOCKERHUB_USERNAME }}/gastos-frontend:latest
+            ${{ vars.DOCKERHUB_USERNAME }}/gastos-frontend:sha-${{ github.sha }}
