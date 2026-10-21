@@ -80,7 +80,10 @@ jobs:
       #   username: ${{ vars.DOCKERHUB_USERNAME }}
       #   password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Login no Docker Hub
-        run: echo "TODO - autenticar no Docker Hub"
+        uses: docker/login-action@v4
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       # Dica: docker/build-push-action@v7
       #   Não precisa de checkout: a action usa o "Git context" e o próprio
@@ -93,4 +96,13 @@ jobs:
       # Lembre: VITE_API_URL é de BUILD TIME (o Vite grava o valor no JS),
       # por isso entra como build-arg. Cadastre-a em Variables, não em Secrets.
       - name: Build e push da imagem
-        run: echo "TODO - buildar a pasta frontend com VITE_API_URL e publicar no Docker Hub"
+        uses: docker/build-push-action@v7
+        with:
+          with:
+            context: "{{defaultContext}}:frontend"
+            push: true
+            build-args: |
+              VITE_API_URL=${{ vars.VITE_API_URL }}
+            tags: |
+${{ vars.DOCKERHUB_USERNAME }}/gastos-frontend:latest
+${{ vars.DOCKERHUB_USERNAME }}/gastos-frontend:sha-${{ github.sha }}

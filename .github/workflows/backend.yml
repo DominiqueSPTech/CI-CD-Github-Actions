@@ -73,7 +73,11 @@ jobs:
       #   username: ${{ vars.DOCKERHUB_USERNAME }}
       #   password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Login no Docker Hub
-        run: echo "TODO - autenticar no Docker Hub"
+        uses: docker/login-action@v4
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
 
       # Dica: docker/build-push-action@v7
       #   Não precisa de checkout: a action usa o "Git context" e o próprio
@@ -82,4 +86,10 @@ jobs:
       #   push: true
       #   tags: ${{ vars.DOCKERHUB_USERNAME }}/gastos-backend:latest
       - name: Build e push da imagem
-        run: echo "TODO - buildar a pasta backend e publicar no Docker Hub"
+        uses: docker/build-push-action@v7
+        with:
+          context: "{{defaultContext}}:backend"
+          push: true
+          tags: |
+            ${{ vars.DOCKERHUB_USERNAME }}/gastos-backend:latest
+            ${{ vars.DOCKERHUB_USERNAME }}/gastos-backend:sha-${{ github.sha }}
