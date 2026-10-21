@@ -33,33 +33,28 @@ jobs:
   # CI: valida o código.
   # ---------------------------------------------------------------------------
   ci:
-    name: Lint, testes e build
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: backend
-
-    steps:
-      # Dica: actions/checkout@v7
-      - name: Checkout do código
-        run: echo "TODO - baixar o repositório"
-
-      # Dica: actions/setup-node@v7 com node-version 24, cache npm
-      #       e cache-dependency-path apontando para backend/package-lock.json
-      - name: Configurar Node.js
-        run: echo "TODO - instalar o Node 24 com cache do npm"
-
-      - name: Instalar dependências
-        run: echo "TODO - npm ci"
-
-      - name: Lint
-        run: echo "TODO - npm run lint"
-
-      - name: Testes
-        run: echo "TODO - npm test"
-
-      - name: Build
-        run: echo "TODO - npm run build"
+name: Lint, testes e build
+runs-on: ubuntu-latest
+defaults:
+run:
+working-directory: backend
+steps:
+- name: Checkout do código
+uses: actions/checkout@v7
+- name: Configurar Node.js
+uses: actions/setup-node@v7
+with:
+node-version: 24
+cache: npm
+cache-dependency-path: backend/package-lock.json
+- name: Instalar dependências
+run: npm ci
+- name: Lint
+run: npm run lint
+- name: Testes
+run: npm test
+- name: Build
+run: npm run build
 
   # ---------------------------------------------------------------------------
   # Docker: gera e publica a imagem. Só roda se o CI passar.
