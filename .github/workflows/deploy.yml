@@ -1,0 +1,49 @@
+# =============================================================================
+# Deploy — atualiza a aplicação na VM via SSH
+#
+# Fluxo (disparo manual em Actions → deploy → Run workflow):
+#   copia deploy/docker-compose.yml para a VM ──► docker compose pull + up -d
+#
+# Rode depois que as imagens novas estiverem no Docker Hub
+# (workflows "backend" e "frontend").
+#
+# Configure em Settings → Secrets and variables → Actions:
+#   Variables: SSH_HOST            Elastic IP da VM (ou o hostname do No-IP)
+#              SSH_USER            ubuntu
+#              DOCKERHUB_USERNAME  (já cadastrada na parte de CI)
+#              DOMAIN              Elastic IP; depois do No-IP, o hostname
+#              ACME_EMAIL          seu e-mail (capítulo de HTTPS)
+#   Secrets:   SSH_PRIVATE_KEY     conteúdo da chave .pem criada junto com a VM
+# =============================================================================
+name: deploy
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy na VM
+    runs-on: ubuntu-latest
+
+    steps:
+      # Dica: actions/checkout@v7 (o arquivo deploy/docker-compose.yml
+      #       precisa estar no runner para ser copiado)
+      - name: Checkout do código
+        run: echo "TODO - baixar o repositório"
+
+      # Dica: appleboy/scp-action@v1
+      #   host:     ${{ vars.SSH_HOST }}
+      #   username: ${{ vars.SSH_USER }}
+      #   key:      ${{ secrets.SSH_PRIVATE_KEY }}
+      #   source:   deploy/docker-compose.yml
+      #   target:   /opt/grana
+      #   strip_components: 1   (copia o arquivo sem a pasta deploy/)
+      - name: Copiar o docker-compose.yml para a VM
+        run: echo "TODO - copiar deploy/docker-compose.yml para /opt/grana"
+
+      # Dica: appleboy/ssh-action@v1 (mesmos host, username e key)
+      #   script: entrar em /opt/grana, gerar o arquivo .env com
+      #           DOCKERHUB_USERNAME, DOMAIN e ACME_EMAIL e rodar
+      #           docker compose pull && docker compose up -d
+      - name: Atualizar os containers na VM
+        run: echo "TODO - gerar o .env e rodar docker compose pull/up na VM"

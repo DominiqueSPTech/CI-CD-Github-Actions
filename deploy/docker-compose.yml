@@ -1,0 +1,54 @@
+# =============================================================================
+# Stack de produção do GRANA na VM: Traefik (proxy reverso) + backend + frontend.
+#
+# Este arquivo é copiado para /opt/grana na VM pelo workflow "deploy".
+# As variáveis ${...} vêm do arquivo .env que o workflow cria ao lado dele:
+#   DOCKERHUB_USERNAME  usuário do Docker Hub (de onde as imagens são baixadas)
+#   DOMAIN              Elastic IP da VM; depois do No-IP, o hostname (ex.: grana-fulano.ddns.net)
+#   ACME_EMAIL          e-mail para o Let's Encrypt (só no capítulo de HTTPS)
+#
+# Roteamento esperado (mesmo endereço para tudo):
+#   http://DOMAIN/api/...  → backend (porta 3000)
+#   http://DOMAIN/...      → frontend (porta 80)
+# =============================================================================
+services:
+  traefik:
+    image: traefik:v3.7
+    command:
+      # Lê as labels dos containers para montar as rotas.
+      - --providers.docker=true
+      # Só publica containers com a label traefik.enable=true.
+      - --providers.docker.exposedbydefault=false
+      # Porta de entrada HTTP.
+      - --entrypoints.web.address=:80
+    ports:
+      - "80:80"
+    volumes:
+      # Somente leitura: o Traefik só precisa observar os containers.
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    restart: unless-stopped
+
+  backend:
+    image: ${DOCKERHUB_USERNAME}/gastos-backend:latest
+    environment:
+      DB_PATH: /data/finance.db
+    volumes:
+      - grana-data:/data
+    # TODO: labels do Traefik para o backend
+    #   - habilitar o Traefik neste container
+    #   - regra: Host(`${DOMAIN}`) && PathPrefix(`/api`)
+    #   - entrypoint: web
+    #   - porta interna do serviço: 3000
+    restart: unless-stopped
+
+  frontend:
+    image: ${DOCKERHUB_USERNAME}/gastos-frontend:latest
+    # TODO: labels do Traefik para o frontend
+    #   - habilitar o Traefik neste container
+    #   - regra: Host(`${DOMAIN}`)
+    #   - entrypoint: web
+    #   - porta interna do serviço: 80
+    restart: unless-stopped
+
+volumes:
+  grana-data:

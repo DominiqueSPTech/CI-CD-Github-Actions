@@ -1,0 +1,90 @@
+# =============================================================================
+# Backend — CI + build/push da imagem no Docker Hub
+#
+# Fluxo (disparo manual em Actions → backend → Run workflow):
+#   job "ci" (lint, testes, build) ──► job "docker" (build + push da imagem)
+#
+# Configure em Settings → Secrets and variables → Actions:
+#   Variables: DOCKERHUB_USERNAME
+#   Secrets:   DOCKERHUB_TOKEN   (access token do Docker Hub, nunca a senha)
+#
+# Obs.: DB_PATH, PORT e CORS_ORIGIN são variáveis de RUNTIME (docker run -e).
+#       Elas NÃO entram aqui; serão usadas no passo de CD.
+# =============================================================================
+name: backend
+
+on:
+  # Disparo manual pela aba Actions (botão "Run workflow").
+  # Atenção: o botão só aparece depois que este arquivo estiver na branch padrão.
+  workflow_dispatch:
+
+  # Evolução (depois): disparar automaticamente em PR e em push na main,
+  # só quando algo do backend mudar. Descomente e remova o workflow_dispatch se quiser.
+  #
+  # pull_request:
+  #   branches: [main]
+  #   paths: ["backend/**", ".github/workflows/backend.yml"]
+  # push:
+  #   branches: [main]
+  #   paths: ["backend/**", ".github/workflows/backend.yml"]
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # CI: valida o código.
+  # ---------------------------------------------------------------------------
+  ci:
+    name: Lint, testes e build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      # Dica: actions/checkout@v7
+      - name: Checkout do código
+        run: echo "TODO - baixar o repositório"
+
+      # Dica: actions/setup-node@v7 com node-version 24, cache npm
+      #       e cache-dependency-path apontando para backend/package-lock.json
+      - name: Configurar Node.js
+        run: echo "TODO - instalar o Node 24 com cache do npm"
+
+      - name: Instalar dependências
+        run: echo "TODO - npm ci"
+
+      - name: Lint
+        run: echo "TODO - npm run lint"
+
+      - name: Testes
+        run: echo "TODO - npm test"
+
+      - name: Build
+        run: echo "TODO - npm run build"
+
+  # ---------------------------------------------------------------------------
+  # Docker: gera e publica a imagem. Só roda se o CI passar.
+  # ---------------------------------------------------------------------------
+  docker:
+    name: Build e push da imagem
+    runs-on: ubuntu-latest
+    # Só começa depois que o job "ci" terminar com sucesso.
+    needs: ci
+    # Se ativar o gatilho de pull_request, adicione aqui:
+    #   if: github.event_name != 'pull_request'
+    # para não publicar imagem a partir de PR.
+
+    steps:
+      # Dica: docker/login-action@v4
+      #   username: ${{ vars.DOCKERHUB_USERNAME }}
+      #   password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Login no Docker Hub
+        run: echo "TODO - autenticar no Docker Hub"
+
+      # Dica: docker/build-push-action@v7
+      #   Não precisa de checkout: a action usa o "Git context" e o próprio
+      #   BuildKit baixa o repositório. Para buildar só a pasta backend:
+      #   context: "{{defaultContext}}:backend"
+      #   push: true
+      #   tags: ${{ vars.DOCKERHUB_USERNAME }}/gastos-backend:latest
+      - name: Build e push da imagem
+        run: echo "TODO - buildar a pasta backend e publicar no Docker Hub"

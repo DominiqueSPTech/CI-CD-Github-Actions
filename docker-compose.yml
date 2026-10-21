@@ -1,0 +1,27 @@
+# Sobe front + back localmente, simulando o que vai rodar na VM.
+#   docker compose up --build
+# Front: http://localhost:8080   API: http://localhost:3000/api/health
+services:
+  backend:
+    build: ./backend
+    environment:
+      PORT: 3000
+      DB_PATH: /data/finance.db
+      CORS_ORIGIN: "*"
+    ports:
+      - "3000:3000"
+    volumes:
+      - db-data:/data
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_URL: http://localhost:3000
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+
+volumes:
+  db-data:

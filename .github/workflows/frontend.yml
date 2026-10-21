@@ -1,0 +1,96 @@
+# =============================================================================
+# Frontend — CI + build/push da imagem no Docker Hub
+#
+# Fluxo (disparo manual em Actions → frontend → Run workflow):
+#   job "ci" (lint, testes, build) ──► job "docker" (build + push da imagem)
+#
+# Configure em Settings → Secrets and variables → Actions:
+#   Variables: DOCKERHUB_USERNAME
+#              VITE_API_URL      (endereço do backend, sem /api; vazio = mesma origem)
+#   Secrets:   DOCKERHUB_TOKEN   (access token do Docker Hub, nunca a senha)
+#
+# Obs.: VITE_API_URL é de BUILD TIME. O Vite grava o valor dentro do JS,
+#       por isso ele entra como build-arg da imagem. Ele fica visível no
+#       navegador, então é uma Variable e não um Secret.
+# =============================================================================
+name: frontend
+
+on:
+  # Disparo manual pela aba Actions (botão "Run workflow").
+  # Atenção: o botão só aparece depois que este arquivo estiver na branch padrão.
+  workflow_dispatch:
+
+  # Evolução (depois): disparar automaticamente em PR e em push na main,
+  # só quando algo do frontend mudar. Descomente e remova o workflow_dispatch se quiser.
+  #
+  # pull_request:
+  #   branches: [main]
+  #   paths: ["frontend/**", ".github/workflows/frontend.yml"]
+  # push:
+  #   branches: [main]
+  #   paths: ["frontend/**", ".github/workflows/frontend.yml"]
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # CI: valida o código.
+  # ---------------------------------------------------------------------------
+  ci:
+    name: Lint, testes e build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      # Dica: actions/checkout@v7
+      - name: Checkout do código
+        run: echo "TODO - baixar o repositório"
+
+      # Dica: actions/setup-node@v7 com node-version 24, cache npm
+      #       e cache-dependency-path apontando para frontend/package-lock.json
+      - name: Configurar Node.js
+        run: echo "TODO - instalar o Node 24 com cache do npm"
+
+      - name: Instalar dependências
+        run: echo "TODO - npm ci"
+
+      - name: Lint
+        run: echo "TODO - npm run lint"
+
+      - name: Testes
+        run: echo "TODO - npm test"
+
+      - name: Build
+        run: echo "TODO - npm run build"
+
+  # ---------------------------------------------------------------------------
+  # Docker: gera e publica a imagem. Só roda se o CI passar.
+  # ---------------------------------------------------------------------------
+  docker:
+    name: Build e push da imagem
+    runs-on: ubuntu-latest
+    # Só começa depois que o job "ci" terminar com sucesso.
+    needs: ci
+    # Se ativar o gatilho de pull_request, adicione aqui:
+    #   if: github.event_name != 'pull_request'
+    # para não publicar imagem a partir de PR.
+
+    steps:
+      # Dica: docker/login-action@v4
+      #   username: ${{ vars.DOCKERHUB_USERNAME }}
+      #   password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Login no Docker Hub
+        run: echo "TODO - autenticar no Docker Hub"
+
+      # Dica: docker/build-push-action@v7
+      #   Não precisa de checkout: a action usa o "Git context" e o próprio
+      #   BuildKit baixa o repositório. Para buildar só a pasta frontend:
+      #   context: "{{defaultContext}}:frontend"
+      #   push: true
+      #   build-args: |
+      #     VITE_API_URL=${{ vars.VITE_API_URL }}
+      #   tags: ${{ vars.DOCKERHUB_USERNAME }}/gastos-frontend:latest
+      # Lembre: VITE_API_URL é de BUILD TIME (o Vite grava o valor no JS),
+      # por isso entra como build-arg. Cadastre-a em Variables, não em Secrets.
+      - name: Build e push da imagem
+        run: echo "TODO - buildar a pasta frontend com VITE_API_URL e publicar no Docker Hub"
