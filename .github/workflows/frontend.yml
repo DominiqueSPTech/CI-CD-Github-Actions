@@ -104,5 +104,5 @@ jobs:
             build-args: |
               VITE_API_URL=${{ vars.VITE_API_URL }}
             tags: |
-${{ vars.DOCKERHUB_USERNAME }}/gastos-frontend:latest
-${{ vars.DOCKERHUB_USERNAME }}/gastos-frontend:sha-${{ github.sha }}
+              ${{ vars.DOCKERHUB_USERNAME }}/gastos-frontend:latest
+              ${{ vars.DOCKERHUB_USERNAME }}/gastos-frontend:sha-${{ github.sha }}
