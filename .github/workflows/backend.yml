@@ -69,13 +69,20 @@ jobs:
     # para não publicar imagem a partir de PR.
 
     steps:
+      - name: Normalizar usuário do Docker Hub
+        id: dockerhub_user
+        shell: bash
+        run: |
+          username="$(printf '%s' '${{ vars.DOCKERHUB_USERNAME }}' | tr -d '\r\n')"
+          echo "value=$username" >> "$GITHUB_OUTPUT"
+
       # Dica: docker/login-action@v4
       #   username: ${{ vars.DOCKERHUB_USERNAME }}
       #   password: ${{ secrets.DOCKERHUB_TOKEN }}
       - name: Login no Docker Hub
         uses: docker/login-action@v4
         with:
-          username: ${{ vars.DOCKERHUB_USERNAME }}
+          username: ${{ steps.dockerhub_user.outputs.value }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
 
@@ -91,5 +98,5 @@ jobs:
           context: "{{defaultContext}}:backend"
           push: true
           tags: |
-            ${{ vars.DOCKERHUB_USERNAME }}/gastos-backend:latest
-            ${{ vars.DOCKERHUB_USERNAME }}/gastos-backend:sha-${{ github.sha }}
+            ${{ steps.dockerhub_user.outputs.value }}/gastos-backend:latest
+            ${{ steps.dockerhub_user.outputs.value }}/gastos-backend:sha-${{ github.sha }}
